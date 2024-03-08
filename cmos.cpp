@@ -18,7 +18,7 @@ struct Fingerprint {
 vector<Fingerprint> generateFingerprints(const string& submission) {
   vector<Fingerprint> fingerprints;
   // Define your sliding window size
-  int windowSize = 2;
+  int windowSize = 5;
   // Hash function 
   auto hashFunction = [](const string& str) {
     int hash = 0;
@@ -37,7 +37,7 @@ vector<Fingerprint> generateFingerprints(const string& submission) {
 }
 
 // Function to compare fingerprints and detect similarities
-void detectSimilarities(const vector<Fingerprint>& fingerprints1, const vector<Fingerprint>& fingerprints2, ofstream& outputFile) {
+double detectSimilarities(const vector<Fingerprint>& fingerprints1, const vector<Fingerprint>& fingerprints2, ofstream& outputFile) {
   // Define your similarity threshold
   double similarityThreshold = 0.8;
   // Calculate the number of matching fingerprints required for similarity
@@ -59,13 +59,18 @@ void detectSimilarities(const vector<Fingerprint>& fingerprints1, const vector<F
     }
   }
 
+  // Calculate similarity score
+  double similarityScore = (double)matchingFingerprints / min(fingerprints1.size(), fingerprints2.size());
+
   // Output similarity result to file
   if (matchingFingerprints >= matchingThreshold) {
-    outputFile << "Similarity Found: " << (double)matchingFingerprints / min(fingerprints1.size(), fingerprints2.size()) << endl;
+    outputFile << "Similarity Found: " << similarityScore << endl;
   }
   else {
     outputFile << "No Similarity" << endl;
   }
+
+  return similarityScore;
 }
 
 // Function to load tokenized file into vector of strings
@@ -107,14 +112,34 @@ int main() {
     cerr << "Error: Unable to open output file." << endl;
     return 1;
   }
+  
+  double highestSimilarity = 0.0;
+  pair<int, int> highestPair;
+  double secondHighestSimilarity = 0.0;
+  pair<int, int> secondHighestPair;
 
   // Compare fingerprints between submissions and write similarities to file
   for (size_t i = 0; i < fingerprints.size(); ++i) {
     for (size_t j = i + 1; j < fingerprints.size(); ++j) {
       outputFile << "Comparing submission " << i + 1 << " and submission " << j + 1 << ":\n";
-      detectSimilarities(fingerprints[i], fingerprints[j], outputFile);
+      double similarity = detectSimilarities(fingerprints[i], fingerprints[j], outputFile);
+      if (similarity > highestSimilarity) {
+        secondHighestSimilarity = highestSimilarity;
+        secondHighestPair = highestPair;
+        highestSimilarity = similarity;
+        highestPair = { i + 1, j + 1 };
+      } else if (similarity > secondHighestSimilarity) {
+        secondHighestSimilarity = similarity;
+        secondHighestPair = { i + 1, j + 1 };
+      }
     }
   }
+
+  // Output the top two most similar scores and the corresponding submission pairs
+  outputFile << "\nTop two most similar scores:\n";
+  outputFile << "1. Submissions " << highestPair.first << " and " << highestPair.second << ": " << highestSimilarity << "\n";
+  outputFile << "2. Submissions " << secondHighestPair.first << " and " << secondHighestPair.second << ": " << secondHighestSimilarity << "\n";
+
 
   // Close output file
   outputFile.close();
