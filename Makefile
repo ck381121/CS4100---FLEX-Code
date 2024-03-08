@@ -25,7 +25,6 @@ all:
 	$(FLEX) cmos.l
 	$(CXX) -o $(LEXER) $(LEXER_SRC)
 	./PlagarismDetector.sh Examples
-
 	$(CXX) $(CMOS_SRC)
 	./a.out 
 
