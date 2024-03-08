@@ -1,17 +1,38 @@
-CXX=g++
-INCLUDES=-I/opt/local/include
-IGNORES=-Wno-deprecated-declarations 
-CPPFLAGS=-Wall -Werror -O2 -fopenmp  ${INCLUDES} ${IGNORES}
+#Makefile For Project 1
+# ck381121@ohio.edu
 
-TARGETS=cmos
+#Flags
+CXX = g++
+FLEX = flex
+CFLAGS = -Wall -Wextra -Werror 
 
-all: ${TARGETS}
+# Source files
+LEXER_SRC = lex.yy.c
+CMOS_SRC = cmos.cpp
 
+# Executable names
+LEXER = lexer
+CMOS = cmos
 
-run: cmos
-	./cmos
-	
-	
+# L
+$(LEXER_SRC): cmos.l
+	$(FLEX) $<
 
+# Build rule for lexer
+$(LEXER): $(LEXER_SRC)
+	$(CC) $(CFLAGS) -o $@ $<
+
+# Rule to run PlagiarismDetector.sh
+run_plagiarism_detector: $(LEXER_EXE)
+	./PlagarismDetector.sh examples
+
+# Build rule for CMOS
+$(CMOS): $(CMOS_SRC)
+	$(CC) $(CFLAGS) -o $@ $<
+
+# Target to build lexer and run plagiarism detector
+all: $(LEXER) run_plagiarism_detector $(CMOS)
+
+# Clean rule
 clean:
-	rm -f $(TARGETS) *.o 
+	rm -f $(LEXER_SRC) $(LEXER) $(CMOS)
