@@ -18,24 +18,14 @@ TOKEN = token.txt
 LEXER = lexer
 CMOS = cmos
 
-# L
-$(LEXER_SRC): cmos.l
-	$(FLEX) $<
 
-# Build rule for lexer
-$(LEXER): $(LEXER_SRC)
-	$(CC) $(CFLAGS) -o $@ $<
-
-# Rule to run PlagiarismDetector.sh
-run_plagiarism_detector: $(LEXER_EXE)
-	./PlagarismDetector.sh examples
-
-# Build rule for CMOS
-$(CMOS): $(CMOS_SRC)
-	$(CC) $(CFLAGS) -o $@ $<
 
 # Target to build lexer and run plagiarism detector
 all: 
+	$(FLEX) cmos.l
+	$(CXX) -o $(LEXER) $(LEXER_SRC)
+	./PlagarismDetector.sh Examples
+
 	$(CXX) $(CMOS_SRC)
 	./a.out 
 
