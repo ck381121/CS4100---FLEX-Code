@@ -7,7 +7,7 @@ FLEX = flex
 CFLAGS = -Wall -Wextra -Werror 
 
 # Source files
-LEXER_SRC = lex.yy.c
+LEXER_SRC = lex.yy.cc
 CMOS_SRC = cmos.cpp
 
 # Executable names

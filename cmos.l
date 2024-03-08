@@ -1,14 +1,13 @@
 %{
-/*
- File: clos.l
- Purpose: Tokenize one student code submission
- build instructions
- flex cmos.l
- make
- g++ -o lexer lex.yy.c
- ./PlagarismDetector examples
-*/
-
+//*****************************************************************************************
+// File: cmos.l
+// Purpose: Tokenize one student code submission
+// build instructions
+// flex cmos.l
+// make
+// g++ -o lexer lex.yy.c
+// ./PlagarismDetector examples
+// ****************************************************************************************
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -23,7 +22,7 @@ using namespace std;
 
 #define TKUNMATCHED 255
 
-int linecut = 1;
+int linecount = 1;
 int variable_count = 1;
 int function_count = 1;
 %}

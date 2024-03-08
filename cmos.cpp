@@ -1,86 +1,124 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
-#include <deque>
-#include <algorithm>
-#include "lex.yy.c" // Include the generated Lex file
+#include <unordered_map>
+#include <string>
+#include <cmath>
 
-using namespace std; 
+using namespace std;
 
-/*
-Guarantee threshold and Noise Threshold
-n_threshold <= g_threshold
+// Fingerprint struct
+struct Fingerprint {
+  string hashValue;
+  int position;
+};
 
-*/
-int g_threshold = 0; //guarantee threshold 
-int n_threshold = 0; //noise threshold
-
-const int k = 5; // size of k-gram (substring size)
-const int w = 4; // window size
-
-// Function to compute a hash value for a given string
-unsigned long hashFunction(string str) {
-    unsigned long hash = 5381;
+// Function to generate fingerprints from tokenized submissions
+vector<Fingerprint> generateFingerprints(const string& submission) {
+  vector<Fingerprint> fingerprints;
+  // Define your sliding window size
+  int windowSize = 10;
+  // Define your hash function (you can use any hash function you like)
+  auto hashFunction = [](const string& str) {
+    // Simple hash function for demonstration purposes
+    int hash = 0;
     for (char c : str) {
-        hash = ((hash << 5) + hash) + c;
+      hash = (hash * 31 + c) % 1000000007; // Adjust modulus as needed
     }
-    return hash;
+    return to_string(hash);
+    };
+
+  for (int i = 0; i <= submission.length() - windowSize; ++i) {
+    string window = submission.substr(i, windowSize);
+    string hashValue = hashFunction(window);
+    fingerprints.push_back({ hashValue, i });
+  }
+  return fingerprints;
 }
 
-// Function to perform the Winnowing Algorithm
-vector<unsigned long> winnowingAlgorithm(string text) {
-    vector<unsigned long> fingerprints;
+// Function to compare fingerprints and detect similarities
+void detectSimilarities(const vector<Fingerprint>& fingerprints1, const vector<Fingerprint>& fingerprints2, ofstream& outputFile) {
+  // Define your similarity threshold
+  double similarityThreshold = 0.8;
+  // Calculate the number of matching fingerprints required for similarity
+  int matchingThreshold = ceil(similarityThreshold * min(fingerprints1.size(), fingerprints2.size()));
 
-    // Compute the hash values for all k-grams
-    vector<unsigned long> hashes;
-    for (int i = 0; i <= text.size() - k; i++) {
-        hashes.push_back(hashFunction(text.substr(i, k)));
+  unordered_map<string, int> fingerprintCounts;
+
+  // Count the occurrences of each fingerprint in the first set
+  for (const auto& fingerprint : fingerprints1) {
+    fingerprintCounts[fingerprint.hashValue]++;
+  }
+
+  int matchingFingerprints = 0;
+
+  // Check for matching fingerprints in the second set
+  for (const auto& fingerprint : fingerprints2) {
+    if (fingerprintCounts[fingerprint.hashValue] > 0) {
+      matchingFingerprints++;
     }
+  }
 
-    // Apply the Winnowing Algorithm
-    deque<pair<unsigned long, int>> window;
-    for (int i = 0; i < hashes.size(); i++) {
-        // Remove hashes outside the current window
-        while (!window.empty() && window.front().second <= i - w) {
-            window.pop_front();
-        }
+  // Output similarity result to file
+  if (matchingFingerprints >= matchingThreshold) {
+    outputFile << "Similarity Found: " << (double)matchingFingerprints / min(fingerprints1.size(), fingerprints2.size()) << endl;
+  }
+  else {
+    outputFile << "No Similarity" << endl;
+  }
+}
 
-        // Remove hashes from the window that are greater than the current hash
-        while (!window.empty() && window.back().first >= hashes[i]) {
-            window.pop_back();
-        }
-
-        // Add the current hash to the window
-        window.push_back({hashes[i], i});
-
-        // If the current hash is the minimum hash in the window, add it to the fingerprints
-        if (window.front().second == i - w + 1) {
-            fingerprints.push_back(window.front().first);
-        }
+// Function to load tokenized file into vector of strings
+vector<string> loadTokens(const string& filename) {
+  ifstream file(filename);
+  vector<string> submissions;
+  if (file.is_open()) {
+    string line;
+    while (getline(file, line)) {
+      submissions.push_back(line);
     }
-
-    return fingerprints;
+    file.close();
+  }
+  else {
+    cout << "Unable to open file: " << filename << endl;
+  }
+  return submissions;
 }
 
 int main() {
+  // Load tokenized submissions
+  vector<string> submissions = loadTokens("tokens.txt");
 
-    // Tokenize the input file
-    yylex();
-    // Read the file
-    ifstream file("token.txt");
-    string text((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+  // Concatenate the lines of each submission into a single string
+  vector<string> concatenatedSubmissions;
+  for (const auto& submission : submissions) {
+    concatenatedSubmissions.push_back(submission);
+  }
 
-    // Perform the Winnowing Algorithm
-    vector<unsigned long> fingerprints = winnowingAlgorithm(text);
+  // Generate fingerprints for each submission
+  vector<vector<Fingerprint>> fingerprints;
+  for (const auto& submission : concatenatedSubmissions) {
+    fingerprints.push_back(generateFingerprints(submission));
+  }
 
-    // Print the fingerprints
-    for (unsigned long fingerprint : fingerprints) {
-        cout << fingerprint << endl;
+  // Open output file for writing
+  ofstream outputFile("PlagiarismReport.txt");
+  if (!outputFile.is_open()) {
+    cerr << "Error: Unable to open output file." << endl;
+    return 1;
+  }
+
+  // Compare fingerprints between submissions and write similarities to file
+  for (size_t i = 0; i < fingerprints.size(); ++i) {
+    for (size_t j = i + 1; j < fingerprints.size(); ++j) {
+      outputFile << "Comparing submission " << i + 1 << " and submission " << j + 1 << ":\n";
+      detectSimilarities(fingerprints[i], fingerprints[j], outputFile);
     }
+  }
 
-    return 0;
+  // Close output file
+  outputFile.close();
 
+  return 0;
 }
-
-
-
