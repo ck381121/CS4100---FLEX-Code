@@ -41,4 +41,4 @@ all:
 
 # Clean rule
 clean:
-	rm -f $(LEXER_SRC) $(LEXER) $(CMOS) $(PLAG) $(TOKEN)
+	rm -f $(LEXER_SRC) $(LEXER) $(CMOS) $(PLAG) $(TOKEN) a.out 
