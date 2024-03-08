@@ -1,13 +1,22 @@
 %{
-//*****************************************************************************************
-// File: cmos.l
-// Purpose: Tokenize one student code submission
-// build instructions
-// flex cmos.l
-// make
-// g++ -o lexer lex.yy.c
-// ./PlagarismDetector examples
-// ****************************************************************************************
+/*
+ File: cmos.l
+ Purpose: Tokenize example files in order to run cmos.cpp 
+
+ Build instructions:
+ flex cmos.l
+ make
+ g++ -o lexer lex.yy.c
+ ./PlagarismDetector.sh examples
+ make all 
+
+ Results in PlagiarismReport.txt file 
+
+ 
+*/
+
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -76,30 +85,30 @@ int yywrap(){
 }
 
 int main() {
-    int token = 0;
-    token = yylex();
-	ofstream outputFile("tokens.txt", ios::app);
+   std::ofstream outputFile("token.txt", std::ios::app);
+
+    int function_count = 0;
+    int variable_count = 0;
+
+    int token = yylex();
     while(token){
         switch (token) {
             case OPERATOR:
                 outputFile << yytext << " ";
                 break;
             case FUNCTION:
-                outputFile << "Function:" << function_count << " ";
-                function_count++;
+                outputFile << "Function:" << ++function_count << " ";
                 break;
             case VARIABLE:
-                outputFile << "<Variable:" << variable_count << " ";
-                variable_count++;
+                outputFile << "<Variable:" << ++variable_count << " ";
                 break;
             case BASIC:
                 outputFile << yytext << " ";
                 break;
-
         }   
         token = yylex();
     }
     outputFile << "\n"; // Insert newline character
-	outputFile.close();
+    outputFile.close();
     return 0;
 }

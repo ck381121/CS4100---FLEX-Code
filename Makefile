@@ -7,8 +7,12 @@ FLEX = flex
 CFLAGS = -Wall -Wextra -Werror 
 
 # Source files
-LEXER_SRC = lex.yy.cc
+LEXER_SRC = lex.yy.c
 CMOS_SRC = cmos.cpp
+
+#Output Files
+PLAG = PlagiarismReport.txt
+TOKEN = token.txt
 
 # Executable names
 LEXER = lexer
@@ -31,8 +35,10 @@ $(CMOS): $(CMOS_SRC)
 	$(CC) $(CFLAGS) -o $@ $<
 
 # Target to build lexer and run plagiarism detector
-all: $(LEXER) run_plagiarism_detector $(CMOS)
+all: 
+	$(CXX) $(CMOS_SRC)
+	./a.out 
 
 # Clean rule
 clean:
-	rm -f $(LEXER_SRC) $(LEXER) $(CMOS)
+	rm -f $(LEXER_SRC) $(LEXER) $(CMOS) $(PLAG) $(TOKEN)

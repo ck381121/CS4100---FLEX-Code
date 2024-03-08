@@ -18,10 +18,9 @@ struct Fingerprint {
 vector<Fingerprint> generateFingerprints(const string& submission) {
   vector<Fingerprint> fingerprints;
   // Define your sliding window size
-  int windowSize = 10;
-  // Define your hash function (you can use any hash function you like)
+  int windowSize = 2;
+  // Hash function 
   auto hashFunction = [](const string& str) {
-    // Simple hash function for demonstration purposes
     int hash = 0;
     for (char c : str) {
       hash = (hash * 31 + c) % 1000000007; // Adjust modulus as needed
@@ -88,7 +87,7 @@ vector<string> loadTokens(const string& filename) {
 
 int main() {
   // Load tokenized submissions
-  vector<string> submissions = loadTokens("tokens.txt");
+  vector<string> submissions = loadTokens("token.txt");
 
   // Concatenate the lines of each submission into a single string
   vector<string> concatenatedSubmissions;
