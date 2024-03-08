@@ -25,9 +25,8 @@ using namespace std;
 #define VARIABLE 1
 #define FUNCTION 2
 #define OPERATOR 3
-#define BASIC 4
-#define EXTRA 5
-#define IGNORE 6
+#define CONDITIONS 4
+#define IGNORE 5
 
 #define TKUNMATCHED 255
 
@@ -61,17 +60,17 @@ IGNORE      .
 {COMMENT}       { /* Ignore comments */ }
 {MULTICOMMENT}  { /* Ignore multi line comment*/ }
 
-"if"		{return BASIC;}
-"else"		{return BASIC;}
-"while"		{return BASIC;}
-"for"		{return BASIC;}
-"return"	{return BASIC;}
-";"			{return BASIC;}
-","			{return BASIC;}
-"("			{return BASIC;}
-")"			{return BASIC;}
-"{"			{return BASIC;}
-"}"			{return BASIC;}
+"if"		{return CONDITIONS;}
+"else"		{return CONDITIONS;}
+"while"		{return CONDITIONS;}
+"for"		{return CONDITIONS;}
+"return"	{return CONDITIONS;}
+";"			{return CONDITIONS;}
+","			{return CONDITIONS;}
+"("			{return CONDITIONS;}
+")"			{return CONDITIONS;}
+"{"			{return CONDITIONS;}
+"}"			{return CONDITIONS;}
 
 {VARIABLE}      { return VARIABLE; }
 {FUNCTION}      { return FUNCTION; }
@@ -102,7 +101,7 @@ int main() {
             case VARIABLE:
                 outputFile << "<Variable:" << ++variable_count << " ";
                 break;
-            case BASIC:
+            case CONDITIONS:
                 outputFile << yytext << " ";
                 break;
         }   
